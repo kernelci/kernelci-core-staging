@@ -40,6 +40,8 @@ def main(args):
         job_dir = setup_job_dir(config.get("jobs"))
     else:
         job_dir = setup_job_dir(os.getcwd() + '/jobs')
+    api = config.get('api')
+    storage = config.get('storage')
 
     arch = args.get('arch')
     plans = args.get('plans')
@@ -47,8 +49,6 @@ def main(args):
     git_describe = args.get('describe')
     tree = args.get('tree')
     kernel = tree
-    storage = args.get('storage')
-    api = args.get('api')
     headers = {
         "Authorization": config.get('token')
     }
@@ -198,14 +198,14 @@ def jinja_render(job):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--token", help="KernelCI API Token")
-    parser.add_argument("--api", help="KernelCI API URL", default="https://api.kernelci.org")
-    parser.add_argument("--storage", help="KernelCI storage URL", default="https://storage.kernelci.org")
+    parser.add_argument("--api", help="KernelCI API URL")
+    parser.add_argument("--storage", help="KernelCI storage URL")
     parser.add_argument("--jobs", help="absolute path to top jobs folder")
     parser.add_argument("--tree", help="KernelCI build kernel tree")
     parser.add_argument("--branch", help="KernelCI build kernel branch")
     parser.add_argument("--describe", help="KernelCI build kernel git describe")
-    parser.add_argument("--config", help="configuration for the LAVA server")
-    parser.add_argument("--section", default="default", help="section in the LAVA config file")
+    parser.add_argument("--config", help="path to KernelCI configuration file")
+    parser.add_argument("--section", default="default", help="section in the KernelCI config file")
     parser.add_argument("--plans", nargs='+', required=True, help="test plan to create jobs for")
     parser.add_argument("--arch", help="specific architecture to create jobs for")
     parser.add_argument("--targets", nargs='+', help="specific targets to create jobs for")
