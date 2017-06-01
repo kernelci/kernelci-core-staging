@@ -34,6 +34,7 @@ from lib.utils import write_file
 import requests
 import urlparse
 import urllib
+import time
 from jinja2 import Environment, FileSystemLoader
 
 
@@ -79,11 +80,24 @@ def main(args):
     })
     url = urlparse.urljoin(api, 'build?{}'.format(url_params))
     print "Calling KernelCI API: %s" % url
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    data = json.loads(response.content)
-    builds = data['result']
+
+    builds = None
+    poll_seconds = 10
+    loops = 600 / poll_seconds # time out after 10 minutes
+    loop = 0
+    while not builds and loop < loops:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        data = json.loads(response.content)
+        builds = data['result']
+        if not builds:
+            loop += 1
+            print("waiting for {}s ({}/{})".format(seconds, loop, loops))
+            time.sleep(poll_seconds)
+    if not builds:
+        raise Exception("No builds found")
     print("Number of builds: {}".format(len(builds)))
+
     jobs = []
     cwd = os.getcwd()
     for build in builds:
