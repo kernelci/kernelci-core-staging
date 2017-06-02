@@ -75,11 +75,9 @@ def main(args):
     if config.get("repo"):
         retrieve_jobs(config.get("repo"))
 
-    if config.get("jobs"):
-        load_jobs(config.get("jobs"))
-        print "Loading jobs from top folder " + str(config.get("jobs"))
-    else:
-        load_jobs(os.getcwd())
+    jobs = config.get("jobs")
+    print("Loading jobs from {}".format(jobs))
+    load_jobs(jobs)
 
     if job_map:
         url = utils.validate_input(config.get("username"), config.get("token"), config.get("server"))
@@ -90,11 +88,10 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="configuration for the LAVA server")
-    parser.add_argument("--jobs", help="absolute path to top jobs folder (default scans the whole cwd)")
+    parser.add_argument("--jobs", help="absolute path to top jobs folder (default scans the whole cwd)", required=True)
     parser.add_argument("--username", help="username for the LAVA server")
     parser.add_argument("--token", help="token for LAVA server api")
     parser.add_argument("--server", help="server url for LAVA server")
     parser.add_argument("--repo", help="git repo for LAVA jobs")
-    parser.add_argument("--timeout", type=int, default=-1, help="polling timeout in seconds. default is -1.")
     args = vars(parser.parse_args())
     main(args)
