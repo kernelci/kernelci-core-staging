@@ -68,7 +68,7 @@ def main(args):
         sys.exit(1)
     data = json.loads(response.content)
     builds = data['result']
-    print len(builds)
+    print("Number of builds: {}".format(len(builds)))
     jobs = []
     cwd = os.getcwd()
     for build in builds:
