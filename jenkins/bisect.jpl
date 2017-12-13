@@ -19,6 +19,17 @@
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+/* Working around some seemingly broken Python set-up... */
+def eggCache() {
+    def egg_cache = env.WORKSPACE + "/python-egg-cache"
+    sh(script: "mkdir -p ${egg_cache}")
+    return egg_cache
+}
+
+/* ----------------------------------------------------------------------------
+ * git utilities
+ */
+
 def getSHA(kdir) {
     def sha
 
@@ -55,6 +66,19 @@ def removeTag(kdir, tag) {
         sh(script: "git tag -d ${tag}")
     }
 }
+
+def checkoutRevision(git_dir, git_rev) {
+    dir(git_dir) {
+        sh(script: """
+git clean -fd && \
+git checkout --detach ${git_rev}
+""")
+    }
+}
+
+/* ----------------------------------------------------------------------------
+ * cloning projects
+ */
 
 def cloneKCIBuild(kci_build) {
     sh(script: "rm -rf ${kci_build}")
@@ -109,21 +133,15 @@ def cloneLAVA_CI(lava_ci) {
     }
 }
 
-/* Working around some seemingly broken Python set-up... */
-def eggCache() {
-    def egg_cache = env.WORKSPACE + "/python-egg-cache"
-    sh(script: "mkdir -p ${egg_cache}")
-    return egg_cache
-}
+/* ----------------------------------------------------------------------------
+ * kernel build
+ */
 
 def buildKernel(kdir, kci_build) {
-    def status
-
     dir(kdir) {
         withCredentials([string(credentialsId: params.KCI_TOKEN_ID,
                                 variable: 'SECRET')]) {
-            status = sh(returnStatus: true,
-                        script: """
+            sh(script: """
 API=${params.API} \
 TOKEN=${SECRET} \
 TREE_NAME=${params.TREE} \
@@ -132,9 +150,18 @@ BRANCH=${params.KERNEL_BRANCH} \
 """ + kci_build + "/build.py -e -g -i -c ${params.DEFCONFIG}")
         }
     }
-
-    return status ? 1 : 0;
 }
+
+def buildRevision(kdir, kci_build, git_rev, name) {
+    checkoutRevision(kdir, git_rev)
+    def tag = createTag(kdir, name)
+    buildKernel(kdir, kci_build)
+    return tag
+}
+
+/* ----------------------------------------------------------------------------
+ * kernel test with LAVA v2
+ */
 
 def submitJob(lava_ci, describe) {
     dir(lava_ci) {
@@ -205,8 +232,18 @@ PYTHON_EGG_CACHE=${egg_cache} \
     return status
 }
 
+def runTest(lava_ci, describe) {
+    cloneLAVA_CI(lava_ci)
+    submitJob(lava_ci, describe)
+    return getResult(lava_ci)
+}
+
+/* ----------------------------------------------------------------------------
+ * bisection
+ */
+
 def bisectStart(kdir) {
-    def status
+    def status = null
 
     dir(kdir) {
         status = sh(returnStatus: true, script: """
@@ -216,7 +253,7 @@ git bisect bad ${params.BAD_COMMIT}
 """)
     }
 
-    return status
+    return (status == 0) ? true : false
 }
 
 def bisectNext(kdir, status) {
@@ -242,9 +279,47 @@ def bisectNext(kdir, status) {
     }
 }
 
+/* ----------------------------------------------------------------------------
+ * pipeline
+ */
+
+def runCheck(kdir, kci_build, git_commit, name, run_status) {
+    def check = null
+    def tag = null
+
+    lock("${env.NODE_NAME}-build-lock") {
+        timeout(time: 60, unit: 'MINUTES') {
+            try {
+                tag = buildRevision(kdir, kci_build, git_commit, name)
+                check = true
+            } catch (error) {
+                check = false
+            }
+        }
+    }
+
+    if (!check)
+        return false
+
+    def describe = gitDescribe(kdir)
+
+    node("kernel-boot-v2") {
+        timeout(time: 120, unit: 'MINUTES') {
+            def lava_ci = env.WORKSPACE + '/lava-ci'
+            def status = runTest(lava_ci, describe)
+            check = (status == run_status ? true : false)
+        }
+    }
+
+    removeTag(kdir, tag)
+
+    return check
+}
+
 node("bisection") {
     def kci_build = env.WORKSPACE + '/kernelci-build'
     def kdir = env.WORKSPACE + '/linux'
+    def check = null
 
     echo """\
 Lab:       ${params.LAB}
@@ -262,20 +337,42 @@ Bad:       ${params.BAD_COMMIT}"""
         return
     }
 
-    def start_result = 0
-
-    timeout(time: 30, unit: 'MINUTES') {
-        stage("Init") {
+    stage("Init") {
+        timeout(time: 30, unit: 'MINUTES') {
             parallel(
                 p1: { cloneKCIBuild(kci_build) },
                 p2: { cloneLinux(kdir) },
             )
-
-            start_result = bisectStart(kdir)
         }
     }
 
-    if (start_result) {
+    stage("Check pass") {
+        check = runCheck(kdir, kci_build, params.GOOD_COMMIT, 'pass', 0)
+    }
+
+    if (!check) {
+        echo "Good revision check failed"
+        currentBuild.result = 'ABORTED'
+        return
+    }
+
+    stage("Check fail") {
+        check = runCheck(kdir, kci_build, params.BAD_COMMIT, 'fail', 2)
+    }
+
+    if (!check) {
+        echo "Bad revision check failed"
+        currentBuild.result = 'ABORTED'
+        return
+    }
+
+    stage("Start") {
+        timeout(time: 5, unit: 'MINUTES') {
+            check = bisectStart(kdir)
+        }
+    }
+
+    if (!check) {
         echo "Failed to start bisection, commits range may be invalid."
         currentBuild.result = 'ABORTED'
         return
@@ -287,28 +384,31 @@ Bad:       ${params.BAD_COMMIT}"""
 
     while (previous != current) {
         def tag = createTag(kdir, iteration)
-        def status
+        def status = null
 
         echo "Iteration #${iteration}: ${tag}"
 
         lock("${env.NODE_NAME}-build-lock") {
-            timeout(time: 60, unit: 'MINUTES') {
-                stage("Build ${iteration}") {
-                    status = buildKernel(kdir, kci_build)
+            stage("Build ${iteration}") {
+                timeout(time: 60, unit: 'MINUTES') {
+                    try {
+                        buildKernel(kdir, kci_build)
+                        status = 0
+                    } catch (error) {
+                        status = 1
+                    }
                 }
             }
         }
 
-        if (!status) {
+        if (status == 0) {
             def describe = gitDescribe(kdir)
 
             node("kernel-boot-v2") {
-                timeout(time: 120, unit: 'MINUTES') {
-                    stage("Test ${iteration}") {
+                stage("Test ${iteration}") {
+                    timeout(time: 120, unit: 'MINUTES') {
                         def lava_ci = env.WORKSPACE + '/lava-ci'
-                        cloneLAVA_CI(lava_ci)
-                        submitJob(lava_ci, describe)
-                        status = getResult(lava_ci)
+                        status = runTest(lava_ci, describe)
                     }
                 }
             }
@@ -316,8 +416,8 @@ Bad:       ${params.BAD_COMMIT}"""
 
         removeTag(kdir, tag)
 
-        timeout(time: 5, unit: 'MINUTES') {
-            stage("Next") {
+        stage("Next") {
+            timeout(time: 5, unit: 'MINUTES') {
                 bisectNext(kdir, status)
             }
         }
