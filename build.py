@@ -567,8 +567,7 @@ if install:
             json_data['status'] = bmeta['build_result']
             dtb_data = []
             for root, dirs, files in os.walk(dtb_dest):
-                px = os.path.split(root)[-1]
-                dtb_data += [os.path.join(px, dtb_file) for dtb_file in files]
+                dtb_data += files
             json_data['dtb_dir_data'] = dtb_data
             try:
                 with open(build_data_json, 'r') as json_file:
