@@ -902,7 +902,7 @@ rk3288_veyron_jaq = {'device_type': 'rk3288-veyron-jaq',
                      'fastboot': False,
                      'mach': 'rockchip'}
 
-rk3399_gru_kevin = {'device_type': 'rk3299-gru-kevin',
+rk3399_gru_kevin = {'device_type': 'rk3399-gru-kevin',
                     'templates': ['generic-depthcharge-tftp-ramdisk-template.jinja2',
                                   'generic-depthcharge-tftp-nfs-template.jinja2'],
                     'kernel_defconfig_blacklist': [],
