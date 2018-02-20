@@ -566,18 +566,18 @@ if install:
                 json_data[k] = bmeta[k]
             json_data['status'] = bmeta['build_result']
             dtb_data = []
-            for root, dirs, files in os.walk(dtb_dest):
-                if root != dtb_dest:
-                    rel = os.path.relpath(root, dtb_dest)
-                    files = list(os.path.join(rel, dtb) for dtb in files)
-                dtb_data += files
+            if dtb_dest:
+                for root, dirs, files in os.walk(dtb_dest):
+                    if root != dtb_dest:
+                        rel = os.path.relpath(root, dtb_dest)
+                        files = list(os.path.join(rel, dtb) for dtb in files)
+                    dtb_data += files
             json_data['dtb_dir_data'] = dtb_data
             try:
                 with open(build_data_json, 'r') as json_file:
                     full_json = json.load(json_file)
                 full_json.append(json_data)
             except Exception as e:
-                print("Warning: {}".format(e))
                 full_json = [json_data]
             with open(build_data_json, 'w') as json_file:
                 json.dump(full_json, json_file)
