@@ -1,3 +1,24 @@
+/*
+  Copyright (C) 2018 Collabora Limited
+  Author: Ana Guerrero Lopez <ana.guerrero@collabora.com>
+
+  This module is free software; you can redistribute it and/or modify it under
+  the terms of the GNU Lesser General Public License as published by the Free
+  Software Foundation; either version 2.1 of the License, or (at your option)
+  any later version.
+
+  This library is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+  details.
+
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, write to the Free Software Foundation, Inc.,
+  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+*/
+
+
+
 /* TODO:
 - Harcoded paths at jenkins/debian/... for Dockerfile and debos file
 */
@@ -27,6 +48,12 @@ def call(Closure context) {
         extraPackages = config.extra_packages
     }
 
+    // defaults to empty script scripts/nothing.sh
+    def script = "scripts/nothing.sh"
+    if (config.script != null) {
+        script = config.script
+    }
+
     def stepsForParallel = [:]
     for (int i = 0; i < kernel_arch.size(); i++) {
         def arch = kernel_arch[i]
@@ -35,14 +62,16 @@ def call(Closure context) {
                                                     arch,
                                                     debian_arch[arch],
                                                     debosFile,
-                                                    extraPackages)
+                                                    extraPackages,
+                                                    name,
+                                                    script)
     }
 
     parallel stepsForParallel
 }
 
 
-def makeImageStep(String pipeline_version, String arch, String debian_arch, String debosFile, String extraPackages) {
+def makeImageStep(String pipeline_version, String arch, String debian_arch, String debosFile, String extraPackages, String name, String script) {
     return {
         node('builder' && 'docker') {
             stage("Checkout") {
@@ -53,7 +82,7 @@ def makeImageStep(String pipeline_version, String arch, String debian_arch, Stri
                 stage("Build base image for ${arch}") {
                     sh """
                         mkdir -p ${pipeline_version}/${arch}
-                        debos -t architecture:${debian_arch} -t basename:${pipeline_version}/${arch} -t extra_packages:'${extraPackages}' ${debosFile}
+                        debos -t architecture:${debian_arch} -t basename:${pipeline_version}/${arch} -t extra_packages:'${extraPackages}' -t script:${script} ${debosFile}
                     """
                 archiveArtifacts artifacts: "${pipeline_version}/${arch}/initrd.cpio.gz", fingerprint: true
                 archiveArtifacts artifacts: "${pipeline_version}/${arch}/rootfs.cpio.gz", fingerprint: true
@@ -66,7 +95,7 @@ def makeImageStep(String pipeline_version, String arch, String debian_arch, Stri
                     withCredentials([string(credentialsId: 'Staging KernelCI API Token', variable: 'API_TOKEN')]) {
                         sh """
                             python push-source.py --token ${API_TOKEN} --api https://staging-api.kernelci.org \
-                                --publish_path images/rootfs/debian/stretch/${arch} \
+                                --publish_path images/rootfs/debian/${name}/ \
                                 --file ${pipeline_version}/${arch}/*.*
                         """
                     }
