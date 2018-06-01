@@ -1806,7 +1806,10 @@ sinlinx_sina33 = {'device_type': 'sun8i-a33-sinlinx-sina33',
                     'mach': 'sunxi'}
 
 dove_cubox = {'device_type': 'dove-cubox',
-                       'templates': ['generic-arm-dtb-kernel-ci-boot-template.json'],
+                       'templates': ['generic-uboot-tftp-ramdisk-template.jinja2',
+                                     'generic-uboot-tftp-ramdisk-kselftest-template.jinja2',
+                                     'generic-uboot-tftp-ramdisk-simple-template.jinja2',
+                                     'generic-uboot-tftp-nfs-template.jinja2'],
                        'kernel_defconfig_blacklist': [],
                        'defconfig_blacklist': ['allmodconfig'],
                        'kernel_blacklist': [],
