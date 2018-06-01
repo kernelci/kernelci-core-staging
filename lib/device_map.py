@@ -1482,7 +1482,10 @@ socfpga_cyclone5_socrates = {'device_type': 'socfpga-cyclone5-socrates',
                              'mach': 'socfpga'}
 
 imx27_phycard_s = {'device_type': 'imx27-phytec-phycard-s-rdk',
-                   'templates': ['generic-arm-dtb-kernel-ci-boot-template.json'],
+                   'templates': ['generic-uboot-tftp-ramdisk-template.jinja2',
+                                 'generic-uboot-tftp-ramdisk-kselftest-template.jinja2',
+                                 'generic-uboot-tftp-ramdisk-simple-template.jinja2',
+                                 'generic-uboot-tftp-nfs-template.jinja2'],
                    'kernel_defconfig_blacklist': [],
                    'defconfig_blacklist': ['allmodconfig'],
                    'kernel_blacklist': ['v3.',
