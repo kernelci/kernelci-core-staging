@@ -1442,7 +1442,10 @@ imx28_duckbill = {'device_type': 'imx28-duckbill',
                   'mach': 'imx'}
 
 imx23_olinuxino = {'device_type': 'imx23-olinuxino',
-                   'templates': ['generic-arm-dtb-kernel-ci-boot-template.json'],
+                   'templates': ['generic-uboot-tftp-ramdisk-template.jinja2',
+                                 'generic-uboot-tftp-ramdisk-kselftest-template.jinja2',
+                                 'generic-uboot-tftp-ramdisk-simple-template.jinja2',
+                                 'generic-uboot-tftp-nfs-template.jinja2'],
                    'kernel_defconfig_blacklist': [],
                    'defconfig_blacklist': ['allmodconfig'],
                    'kernel_blacklist': ['v3.',
