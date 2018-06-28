@@ -158,8 +158,10 @@ def get_job_params(config, template, opts, device, build, defconfig, plan):
         initrd_url = KSELFTEST_INITRD_URL.format(initrd_arch)
     elif 'v4l2' in plan:
         initrd_url = DEBIANTESTS_INITRD_URL.format(debian_initrd_arch)
+        rootfs_prompt = "/ #"
     else:
         initrd_url = INITRD_URL.format(initrd_arch)
+
     if 'nfs' in plan:
         nfsrootfs_url = NFSROOTFS_URL.format(initrd_arch)
         initrd_url = None
