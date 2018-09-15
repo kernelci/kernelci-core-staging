@@ -1,0 +1,13 @@
+@Library('kernelci') _
+import org.kernelci.debian.RootFS
+
+def r = new RootFS()
+
+def config = ['name':"stretchv4l2",
+              'arch_list':["armhf", "armel", "arm64", "i386", "amd64"],
+              'debian_release':"stretch",
+//              'extra_packages':"libcairo2 libglib2.0-0",
+              'extra_packages':"",
+              'script':"scripts/stretchv4l2.sh"]
+
+r.buildImage(config)
