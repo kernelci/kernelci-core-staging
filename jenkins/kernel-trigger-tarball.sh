@@ -64,6 +64,7 @@ trees=(
     [tomeu]="https://gitlab.collabora.com/tomeu/linux.git"
     [osf]="https://github.com/OpenSourceFoundries/linux.git"
     [clk]="https://git.kernel.org/pub/scm/linux/kernel/git/clk/linux.git"
+    [media]="https://git.linuxtv.org/media_tree.git"
 )
 
 OFS=${IFS}
