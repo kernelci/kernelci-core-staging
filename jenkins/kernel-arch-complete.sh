@@ -206,3 +206,23 @@ if [[ BUILDS_FINISHED -eq 4 ]]; then
         fi
     fi
 fi
+
+# We're only building the media tree in arm, arm64 and x86
+if [ "$TREE_NAME" == "media" ]; then
+    if [ -f ${BASEDIR}/arm64.done ] && [ -f ${BASEDIR}/arm.done ] && [ -f ${BASEDIR}/x86.done ]; then
+
+        echo "Build has now finished, reporting result to dashboard."
+        curl -X POST -H "Authorization: $EMAIL_AUTH_TOKEN" -H "Content-Type: application/json" -d '{"job": "'$TREE_NAME'", "kernel": "'$GIT_DESCRIBE'", "git_branch": "'$BRANCH'"}' ${API}/job
+        if [ "$EMAIL" != "true" ]; then
+            echo "Not sending emails because EMAIL was false"
+            exit 0
+        fi
+        if [ "$BRANCH" == "master" ]; then
+            curl -X POST -H "Authorization: $EMAIL_AUTH_TOKEN" -H "Content-Type: application/json" -d '{"job": "'$TREE_NAME'", "kernel": "'$GIT_DESCRIBE'", "git_branch": "'$BRANCH'", "build_report": 1, "send_to": ["ana@collabora.com", "ezequiel@collabora.com", "guillaume.tucker@collabora.com", "gustavo.padovan@collabora.com"], "format": ["txt"], "delay": 10}' ${API}/send
+
+            curl -X POST -H "Authorization: $EMAIL_AUTH_TOKEN" -H "Content-Type: application/json" -d '{"job": "'$TREE_NAME'", "kernel": "'$GIT_DESCRIBE'", "git_branch": "'$BRANCH'", "boot_report": 1, "send_to": ["ana@collabora.com", "ezequiel@collabora.com", "guillaume.tucker@collabora.com", "gustavo.padovan@collabora.com"], "format": ["txt"], "delay": 5400}' ${API}/send
+
+            curl -X POST -H "Authorization: $EMAIL_AUTH_TOKEN" -H "Content-Type: application/json" -d '{"job": "'$TREE_NAME'", "kernel": "'$GIT_DESCRIBE'", "git_branch": "'$BRANCH'",  "report_type": "test", "plans": ["v4l2"], "send_to": ["ana@collabora.com", "ezequiel@collabora.com", "guillaume.tucker@collabora.com", "gustavo.padovan@collabora.com"], "format": ["txt"], "delay": 5400}' ${API}/send
+        fi
+    fi
+fi
