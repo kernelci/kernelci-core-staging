@@ -65,6 +65,7 @@ trees=(
     [osf]="https://github.com/OpenSourceFoundries/linux.git"
     [clk]="https://git.kernel.org/pub/scm/linux/kernel/git/clk/linux.git"
     [media]="https://git.linuxtv.org/media_tree.git"
+    [ana]="https://github.com/ana/linux"
 )
 
 OFS=${IFS}

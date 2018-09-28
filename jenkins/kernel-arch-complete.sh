@@ -208,7 +208,7 @@ if [[ BUILDS_FINISHED -eq 4 ]]; then
 fi
 
 # We're only building the media tree in arm, arm64 and x86
-if [ "$TREE_NAME" == "media" ]; then
+if [ "$TREE_NAME" == "media" ] || [ "$TREE_NAME" == "ana" ]; then
     if [ -f ${BASEDIR}/arm64.done ] && [ -f ${BASEDIR}/arm.done ] && [ -f ${BASEDIR}/x86.done ]; then
 
         echo "Build has now finished, reporting result to dashboard."
