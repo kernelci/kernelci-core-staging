@@ -271,6 +271,15 @@ node("defconfig-creator") {
         def builds = [:]
         def i = 0
 
+        // Hack to avoid building all defconfigs
+        arch_configs = []
+        arch_configs.add(["arm64", "defconfig"])
+        arch_configs.add(["arm64", "defconfig+kernel/configs/virtualvideo.config"])
+        arch_configs.add(["arm", "multi_v7_defconfig+kernel/configs/virtualvideo.config"])
+        arch_configs.add(["arm", "multi_v7_defconfig"])
+        arch_configs.add(["x86", "defconfig"])
+        arch_configs.add(["x86", "defconfig+kernel/configs/virtualvideo.config"])
+
         for (x in arch_configs) {
             def arch = x[0]
             def config = x[1]
