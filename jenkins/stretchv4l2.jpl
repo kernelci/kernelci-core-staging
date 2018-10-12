@@ -6,7 +6,7 @@ def r = new RootFS()
 def config = ['name':"stretchv4l2",
               'arch_list':["armhf", "arm64", "amd64"],
               'debian_release':"stretch",
-              'extra_packages':"",
+              'extra_packages':"wget",
               'script':"scripts/stretchv4l2.sh",
               'test_overlay': "overlays/tests",
              ]
