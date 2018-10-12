@@ -7,7 +7,7 @@ def config = ['name':"stretchv4l2",
               'arch_list':["armhf", "armel", "arm64", "i386", "amd64"],
               'debian_release':"stretch",
 //              'extra_packages':"libcairo2 libglib2.0-0",
-              'extra_packages':"",
+              'extra_packages':"wget",
               'script':"scripts/stretchv4l2.sh"]
 
 r.buildImage(config)
