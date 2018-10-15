@@ -2,6 +2,10 @@
 
 set -e
 
+driver_name=$(basename $(readlink -f /sys/class/video4linux/video2/device/driver)) && echo "[kernelci-meta-data] v4l2 driver: $driver_name" || echo "Failed to get v4l2 driver name"
+
+device_name=$(cat /sys/class/video4linux/video2/name) && echo "[kernelci-meta-data] v4l2 device: $device_name" || echo "Failed to get v4l2 device name"
+
 IFS=''
 
 v4l2-compliance -s | while read line; do
