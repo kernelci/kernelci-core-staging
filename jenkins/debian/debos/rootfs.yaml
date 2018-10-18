@@ -81,6 +81,12 @@ actions:
     description: Add /var/tmp
     source: overlays/minimal
 
+{{ if .test_overlay }}
+  - action: overlay
+    description: Add test overlay {{ .test_overlay }}
+    source: {{ .test_overlay }}
+{{ end }}
+
   - action: run
     description: Drop legacy /var/lib/dbus/machine-id generation
     chroot: true
@@ -146,4 +152,3 @@ actions:
     description: Create cpio archive
     chroot: false
     command: cd ${ROOTDIR} ; find -H  |  cpio -H newc -v -o | gzip -c - > ${ARTIFACTDIR}/{{ $basename -}}/rootfs.cpio.gz
-
