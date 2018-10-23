@@ -634,7 +634,7 @@ device_types:
     boot_method: uboot
     flags: ['lpae', 'fastboot']
 
-  rk3328_rock64:
+  rk3288_rock64:
     name: 'rk3328-rock64'
     mach: rockchip
     class: arm64-dtb
