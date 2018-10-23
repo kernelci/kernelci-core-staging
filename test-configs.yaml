@@ -634,7 +634,7 @@ device_types:
     boot_method: uboot
     flags: ['lpae', 'fastboot']
 
-  rk3288_rock64:
+  rk3328_rock64:
     name: 'rk3328-rock64'
     mach: rockchip
     class: arm64-dtb
@@ -972,7 +972,7 @@ test_configs:
   - device_type: rk3288_rock2_square
     test_plans: [boot, boot_nfs, kselftest, sleep, usb]
 
-  - device_type: rk3288_rock64
+  - device_type: rk3328_rock64
     test_plans: [boot]
 
   - device_type: rk3288_veyron_jaq
