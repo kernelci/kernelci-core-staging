@@ -57,8 +57,6 @@ def buildImage(config) {
         script = config.script
     }
 
-    def test_overlay = config.test_overlay ?: ""
-
     def stepsForParallel = [:]
     for (int i = 0; i < archList.size(); i++) {
         def arch = archList[i]
@@ -69,22 +67,14 @@ def buildImage(config) {
                                                     debosFile,
                                                     extraPackages,
                                                     name,
-                                                    script,
-                                                    test_overlay)
+                                                    script)
     }
 
     parallel stepsForParallel
 }
 
 
-def makeImageStep(String pipeline_version,
-                  String arch,
-                  String debianRelease,
-                  String debosFile,
-                  String extraPackages,
-                  String name,
-                  String script,
-                  String test_overlay) {
+def makeImageStep(String pipeline_version, String arch, String debianRelease, String debosFile, String extraPackages, String name, String script) {
     return {
         node('builder' && 'docker') {
             stage("Checkout") {
@@ -95,7 +85,7 @@ def makeImageStep(String pipeline_version,
                 stage("Build base image for ${arch}") {
                     sh """
                         mkdir -p ${pipeline_version}/${arch}
-                        debos -t architecture:${arch} -t suite:${debianRelease} -t basename:${pipeline_version}/${arch} -t extra_packages:'${extraPackages}' -t script:${script} -t test_overlay:'${test_overlay}' ${debosFile}
+                        debos -t architecture:${arch} -t suite:${debianRelease} -t basename:${pipeline_version}/${arch} -t extra_packages:'${extraPackages}' -t script:${script} ${debosFile}
                     """
                 archiveArtifacts artifacts: "${pipeline_version}/${arch}/initrd.cpio.gz", fingerprint: true
                 archiveArtifacts artifacts: "${pipeline_version}/${arch}/rootfs.cpio.gz", fingerprint: true
@@ -132,3 +122,5 @@ def getDockerArgs() {
 
   return "--group-add " + "${GROUP}"
 }
+
+
