@@ -13,7 +13,13 @@
           - functional
         run:
           steps:
-          - /usr/bin/v4l2-parser.sh
+          - v4l2-compliance | sed "s/test /test $test/g"
+        parse:
+          pattern: 'test (?P<test_case_id>\S*):\s+(?P<result>(OK|FAIL|SKIP))'
+          fixupdict:
+            OK: pass
+            FAIL: fail
+            SKIP: skip
       lava-signal: kmsg
       from: inline
       name: v4l2
