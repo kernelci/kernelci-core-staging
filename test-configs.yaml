@@ -22,7 +22,7 @@ file_system_types:
       armhf: {arch: arm}
 
   debian_stretchv4l2:
-    url: 'http://staging-storage.kernelci.org/images/rootfs/debian/stretchv4l2/20180927.0/'
+    url: 'http://staging-storage.kernelci.org/images/rootfs/debian/stretchv4l2/20181106.1'
     arch_map:
       armhf: {arch: arm}
       amd64: {arch: x86}
