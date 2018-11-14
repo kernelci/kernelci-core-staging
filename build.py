@@ -519,7 +519,8 @@ if install:
             print "ERROR: TREE_NAME not set, aborting publish step"
             publish = False
 
-    publish_path = os.path.join(job, git_branch, git_describe, arch, defconfig)
+    publish_path = os.path.join(
+        job, git_branch, git_describe, arch, defconfig_full)
     bmeta['file_server_resource'] = publish_path
 
     # Create JSON format build metadata
