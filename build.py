@@ -350,6 +350,8 @@ extra_configs(dot_config, kbuild_output)
 #
 if len(args) >= 1:
     build_target = args[0]
+elif arch == "arc":
+    build_target = "uImage.gz"
 result = do_make(build_target, log=True)
 
 # Build modules
@@ -400,6 +402,8 @@ if install:
         patterns = ['Image']
     elif arch == 'mips':
         patterns = ['vmlinux.bin.z', 'vmlinux.ecoff']
+    elif arch == "arc":
+        patterns = ['uImage.gz']
     else:
         patterns = ['bzImage']
 
