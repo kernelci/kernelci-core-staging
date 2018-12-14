@@ -294,7 +294,7 @@ if use_environment:
     git_branch = os.environ.get('BRANCH', git_branch)
     git_describe = os.environ.get('GIT_DESCRIBE', git_describe)
     git_describe_v = os.environ.get('GIT_DESCRIBE_VERBOSE', git_describe_v)
-    build_environment = os.environ.get('COMPILER', build_environment)
+    build_environment = os.environ.get('CC', build_environment)
 
 start_time = time.time()
 
