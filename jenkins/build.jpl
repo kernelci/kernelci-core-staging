@@ -41,7 +41,7 @@ GIT_DESCRIBE_VERBOSE
 COMMIT_ID
   Git commit SHA1 at the revision of the snapshot
 CC (gcc)
-  Name the compiler
+  Name of the compiler
 CC_VERSION (7)
   Version of the compiler
 PUBLISH (boolean)
