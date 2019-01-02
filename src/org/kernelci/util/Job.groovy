@@ -39,9 +39,9 @@ def dockerImageName(base, cc, cc_version, kernel_arch) {
 
     if (cc == "gcc") {
         def docker_arch
-       
+
         if (kernel_arch == "riscv")
-       	    docker_arch = "riscv64"
+            docker_arch = "riscv64"
         else if ((kernel_arch == "i386") || (kernel_arch == "x86_64"))
             docker_arch = "x86"
         else
