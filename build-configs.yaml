@@ -58,6 +58,9 @@ trees:
   linaro-android:
     url: "https://android-git.linaro.org/git/kernel/linaro-android.git"
 
+  linusw:
+    url: "https://git.kernel.org/pub/scm/linux/kernel/git/linusw/linux-gpio.git/"
+
   lsk:
     url: "https://git.linaro.org/kernel/linux-linaro-stable.git"
 
@@ -291,6 +294,10 @@ build_configs:
   linaro-android:
     tree: linaro-android
     branch: 'linaro-android-llct'
+
+  linusw:
+    tree: linusw
+    branch: ['devel', 'fixes', 'for-next']
 
   lsk_for-test:
     tree: lsk
