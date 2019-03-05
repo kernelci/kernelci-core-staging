@@ -295,9 +295,17 @@ build_configs:
     tree: linaro-android
     branch: 'linaro-android-llct'
 
-  linusw:
+  linusw_devel:
     tree: linusw
-    branch: ['devel', 'fixes', 'for-next']
+    branch: 'devel'
+
+  linusw_fixes:
+    tree: linusw
+    branch: 'fixes'
+
+  linusw_for-next:
+    tree: linusw
+    branch: 'for-next'
 
   lsk_for-test:
     tree: lsk
