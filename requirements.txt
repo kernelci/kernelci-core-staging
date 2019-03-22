@@ -1,4 +1,0 @@
-jinja2
-keyring
-pyyaml
-requests
